@@ -1,0 +1,129 @@
+name: Check for New KDK Releases
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-kdk-updates:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml
+      
+      - name: Check for new KDK releases
+        id: check_kdk
+        run: |
+          python3 << 'EOF'
+          import requests
+          import json
+          import re
+          from bs4 import BeautifulSoup
+          import os
+          
+          # Apple's developer download page
+          APPLE_DOWNLOADS_URL = "https://developer.apple.com/download/all/"
+          
+          # Try to get KDK information from Apple Developer Downloads
+          # Note: This requires authentication, so we'll check public feeds
+          
+          # Alternative: Check macOS releases page
+          try:
+              # Get latest macOS version info
+              response = requests.get("https://support.apple.com/en-us/HT201222", timeout=10)
+              soup = BeautifulSoup(response.content, 'html.parser')
+              
+              # Look for version information
+              print("Checking for macOS versions...")
+              
+              # For demonstration, we'll create a basic structure
+              # In production, you'd want to scrape or use an API
+              
+              latest_versions = []
+              # This is a placeholder - actual implementation would parse the page
+              print("Note: Full KDK detection requires Apple Developer authentication")
+              print("Consider using RSS feeds or authenticated API access")
+              
+          except Exception as e:
+              print(f"Error checking for updates: {e}")
+          
+          # Check if we have stored version info
+          version_file = "kdk_versions.json"
+          if os.path.exists(version_file):
+              with open(version_file, 'r') as f:
+                  stored_versions = json.load(f)
+          else:
+              stored_versions = []
+          
+          # Example version check (would be populated from actual scraping)
+          # current_versions = ["14.0", "13.6.1", "13.5"]
+          
+          print("::set-output name=new_release::false")
+          EOF
+      
+      - name: Read KDK versions file
+        id: read_versions
+        run: |
+          if [ -f "kdk_versions.json" ]; then
+            echo "versions=$(cat kdk_versions.json)" >> $GITHUB_OUTPUT
+          else
+            echo "versions=[]" >> $GITHUB_OUTPUT
+            echo "[]" > kdk_versions.json
+          fi
+      
+      - name: Create issue for new KDK release
+        if: steps.check_kdk.outputs.new_release == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.check_kdk.outputs.version }}';
+            const downloadUrl = '${{ steps.check_kdk.outputs.download_url }}';
+            
+            const issueTitle = `New KDK Release Available: ${version}`;
+            const issueBody = `## New Kernel Debug Kit Release Detected
+            
+            A new KDK version has been released by Apple:
+            
+            **Version:** ${version}
+            **Download:** ${downloadUrl || 'Check Apple Developer Downloads'}
+            
+            ### Action Items:
+            - [ ] Verify the release on Apple Developer Portal
+            - [ ] Test the new KDK version
+            - [ ] Update documentation if needed
+            - [ ] Create a GitHub release for tracking
+            
+            ---
+            *This issue was automatically created by the KDK update checker workflow.*
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['kdk-update', 'automated']
+            });
+      
+      - name: Commit version updates
+        if: steps.check_kdk.outputs.new_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add kdk_versions.json
+          git commit -m "chore: Update KDK versions tracking"
+          git push

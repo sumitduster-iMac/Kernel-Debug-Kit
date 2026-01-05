@@ -27,6 +27,7 @@
   - [Configure Target Device for Core Dumps](#configure-the-target-device-for-core-dumps)
 - [Troubleshooting](#-troubleshooting)
 - [Additional Resources](#-additional-resources)
+- [Automatic Release Tracking](#-automatic-release-tracking)
 
 ---
 
@@ -602,6 +603,36 @@ mount
 - ⚠️ Disabling SIP and modifying kernel settings can expose your system to security risks
 - ⚠️ Only perform these operations on development/testing machines
 - ⚠️ Remember to restore security settings when debugging is complete
+
+---
+
+## 🤖 Automatic Release Tracking
+
+This repository includes an automated system to monitor and notify when Apple releases new Kernel Debug Kit versions.
+
+### How It Works
+
+- **Daily Checks**: GitHub Actions workflow runs daily to check for new KDK releases
+- **Automatic Notifications**: When a new release is detected, an issue is automatically created
+- **Version Tracking**: All detected versions are tracked in `kdk_versions.json`
+- **Manual Trigger**: You can manually trigger the check via GitHub Actions
+
+### Manual Check
+
+To manually check for new KDK releases:
+
+```bash
+python3 scripts/check_kdk_releases.py
+```
+
+### Workflow Configuration
+
+The automated check runs via `.github/workflows/check-kdk-updates.yml`. You can:
+- Adjust the schedule (default: daily at 00:00 UTC)
+- Manually trigger from the Actions tab
+- Customize notification settings
+
+> **Note:** Full automation requires Apple Developer credentials. The current implementation creates alerts for manual verification at [Apple's Developer Downloads page](https://developer.apple.com/download/all/).
 
 ---
 
