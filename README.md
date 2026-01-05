@@ -24,7 +24,7 @@
   - [Remove Variants](#removing-the-variants)
 - [Core Dump Server](#-core-dump-server)
   - [Configure Server Device](#configure-the-server-device)
-  - [Configure Target Device for Core Dumps](#configure-the-target-device-1)
+  - [Configure Target Device for Core Dumps](#configure-the-target-device-for-core-dumps)
 - [Troubleshooting](#-troubleshooting)
 - [Additional Resources](#-additional-resources)
 
@@ -495,7 +495,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.kdumpd.plist
 
 ---
 
-### Configure the Target Device
+### Configure the Target Device for Core Dumps
 
 The same compatibility requirements apply to the target device as for two-machine debugging. You must also configure the target device as if you're using it for two-machine debugging (see the relevant sections above for [Apple Silicon](#configure-apple-silicon-as-a-target-device) or [Intel-based Mac](#configure-an-intel-based-mac-as-a-target-device)).
 
