@@ -52,9 +52,6 @@ jobs:
               
               # For demonstration, we'll create a basic structure
               # In production, you'd want to scrape or use an API
-              
-              latest_versions = []
-              # This is a placeholder - actual implementation would parse the page
               print("Note: Full KDK detection requires Apple Developer authentication")
               print("Consider using RSS feeds or authenticated API access")
               
@@ -72,7 +69,9 @@ jobs:
           # Example version check (would be populated from actual scraping)
           # current_versions = ["14.0", "13.6.1", "13.5"]
           
-          print("::set-output name=new_release::false")
+          # Use modern GitHub Actions output format
+          with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+              f.write("new_release=false\n")
           EOF
       
       - name: Read KDK versions file

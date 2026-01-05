@@ -29,20 +29,6 @@ def save_tracked_versions(versions: List[Dict]):
     with open(KDK_VERSIONS_FILE, 'w') as f:
         json.dump(versions, indent=2, fp=f)
 
-def check_apple_developer_rss():
-    """
-    Check Apple Developer RSS feeds for KDK releases.
-    
-    Note: Apple doesn't provide a dedicated RSS feed for KDK.
-    This is a placeholder for custom implementation.
-    """
-    print("Checking for new KDK releases...")
-    
-    # Apple Developer Downloads RSS (if available)
-    # This would need to be customized based on available feeds
-    
-    return None
-
 def check_for_new_releases() -> Optional[Dict]:
     """
     Check for new KDK releases.
