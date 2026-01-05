@@ -608,7 +608,7 @@ mount
 
 ## 🤖 Automatic Release Tracking
 
-This repository includes an automated system to monitor and notify when Apple releases new Kernel Debug Kit versions.
+This repository includes a framework for automated monitoring of new Kernel Debug Kit releases from Apple.
 
 ### How It Works
 
@@ -625,14 +625,25 @@ To manually check for new KDK releases:
 python3 scripts/check_kdk_releases.py
 ```
 
+### Customization Required
+
+This is a **framework** that requires customization for your environment:
+
+1. **Authentication**: Add Apple Developer credentials to the workflow
+2. **Detection Logic**: Implement KDK version detection in `scripts/check_kdk_releases.py`
+3. **Workflow Secrets**: Configure GitHub secrets for API access
+
+See `scripts/README.md` for implementation guidance.
+
 ### Workflow Configuration
 
 The automated check runs via `.github/workflows/check-kdk-updates.yml`. You can:
 - Adjust the schedule (default: daily at 00:00 UTC)
 - Manually trigger from the Actions tab
 - Customize notification settings
+- Add your detection logic to the workflow
 
-> **Note:** Full automation requires Apple Developer credentials. The current implementation creates alerts for manual verification at [Apple's Developer Downloads page](https://developer.apple.com/download/all/).
+> **Note:** This is a framework/starter template. Full automation requires Apple Developer credentials and custom implementation. The framework provides infrastructure for tracking and notifications once you add your detection logic.
 
 ---
 

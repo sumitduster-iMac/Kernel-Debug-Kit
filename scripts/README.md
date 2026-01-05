@@ -4,7 +4,7 @@ This directory contains automation scripts for the Kernel Debug Kit repository.
 
 ## check_kdk_releases.py
 
-Automated script to check for new Kernel Debug Kit releases from Apple.
+Framework script for checking new Kernel Debug Kit releases from Apple.
 
 ### Usage
 
@@ -14,15 +14,25 @@ python3 scripts/check_kdk_releases.py
 
 ### Features
 
-- Checks for new KDK releases from Apple
+- Framework for checking new KDK releases from Apple
 - Tracks versions in `kdk_versions.json`
 - Integrates with GitHub Actions for automated checks
 - Creates notifications when new releases are detected
 
+### Customization Required
+
+This is a framework script. To make it functional, you need to customize the `check_for_new_releases()` function with:
+- Authentication to Apple Developer Portal
+- Web scraping or API integration
+- Version comparison logic
+
 ### Requirements
 
+Base requirements are minimal. Add dependencies as needed for your implementation:
+
 ```bash
-pip install requests beautifulsoup4 lxml
+# Example for web scraping approach:
+# pip install requests beautifulsoup4 lxml
 ```
 
 ### GitHub Actions Integration
@@ -31,4 +41,4 @@ This script is automatically run daily via the `.github/workflows/check-kdk-upda
 
 ### Note
 
-Full automation requires Apple Developer credentials for accessing the download catalog. The current implementation provides a framework for manual verification and tracking.
+Full automation requires Apple Developer credentials and integration with Apple's download catalog. This framework provides the infrastructure - customize it based on your specific environment and access level.
