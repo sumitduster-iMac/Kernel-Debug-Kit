@@ -106,7 +106,9 @@ def main():
                 f.write(f"version={new_release.get('version', '')}\n")
                 f.write(f"download_url={new_release.get('download_url', '')}\n")
                 f.write(f"macos_version={new_release.get('macos_version', '')}\n")
-                f.write(f"date={new_release.get('date', '')}\n")
+                # Use detected date or current date as fallback
+                release_date = new_release.get('date', datetime.utcnow().strftime('%Y-%m-%d'))
+                f.write(f"date={release_date}\n")
         
         return 0
     else:
@@ -119,7 +121,8 @@ def main():
                 f.write(f"version=\n")
                 f.write(f"download_url=\n")
                 f.write(f"macos_version=\n")
-                f.write(f"date=\n")
+                # Always provide current date as fallback
+                f.write(f"date={datetime.utcnow().strftime('%Y-%m-%d')}\n")
         
         return 0
 

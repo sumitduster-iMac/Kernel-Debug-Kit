@@ -63,12 +63,16 @@ jobs:
           # - Set new_release=true if new version found
           
           # Use modern GitHub Actions output format
+          # Generate current date as fallback
+          from datetime import datetime
+          current_date = datetime.utcnow().strftime('%Y-%m-%d')
+          
           with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
               f.write("new_release=false\n")
               f.write("version=\n")
               f.write("download_url=\n")
               f.write("macos_version=\n")
-              f.write("date=\n")
+              f.write(f"date={current_date}\n")
           EOF
       
       - name: Read KDK versions file
@@ -122,7 +126,7 @@ jobs:
             const version = '${{ steps.check_kdk.outputs.version }}';
             const downloadUrl = '${{ steps.check_kdk.outputs.download_url }}';
             const macosVersion = '${{ steps.check_kdk.outputs.macos_version }}';
-            const detectionDate = '${{ steps.check_kdk.outputs.date }}' || new Date().toISOString().split('T')[0];
+            const detectionDate = '${{ steps.check_kdk.outputs.date }}';
             
             const releaseTag = `kdk-${version}`;
             const releaseName = `Kernel Debug Kit ${version}`;
@@ -133,7 +137,7 @@ jobs:
             ### Release Information
             
             - **KDK Version:** ${version}
-            ${macosVersion ? `- **macOS Version:** ${macosVersion}` : ''}
+            - **macOS Version:** ${macosVersion || 'N/A'}
             - **Detection Date:** ${detectionDate}
             
             ### Download
@@ -162,7 +166,9 @@ jobs:
               });
               console.log(`✅ Created release: ${releaseName}`);
             } catch (error) {
-              console.error('Failed to create release:', error);
+              console.error(`❌ Failed to create GitHub release for ${releaseName}`);
+              console.error(`Error details: ${error.message}`);
+              console.error('You may need to create the release manually from the GitHub UI.');
               // Don't fail the workflow if release creation fails
             }
       
