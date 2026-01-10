@@ -104,6 +104,9 @@ def main():
             with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
                 f.write(f"new_release=true\n")
                 f.write(f"version={new_release.get('version', '')}\n")
+                f.write(f"download_url={new_release.get('download_url', '')}\n")
+                f.write(f"macos_version={new_release.get('macos_version', '')}\n")
+                f.write(f"date={new_release.get('date', '')}\n")
         
         return 0
     else:
@@ -113,6 +116,10 @@ def main():
         if os.getenv('GITHUB_OUTPUT'):
             with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
                 f.write(f"new_release=false\n")
+                f.write(f"version=\n")
+                f.write(f"download_url=\n")
+                f.write(f"macos_version=\n")
+                f.write(f"date=\n")
         
         return 0
 

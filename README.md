@@ -614,6 +614,7 @@ This repository includes a framework for automated monitoring of new Kernel Debu
 
 - **Daily Checks**: GitHub Actions workflow runs daily to check for new KDK releases
 - **Automatic Notifications**: When a new release is detected, an issue is automatically created
+- **GitHub Releases**: When a new KDK is detected, a GitHub release is automatically created for tracking
 - **Version Tracking**: All detected versions are tracked in `kdk_versions.json`
 
 ### Manual Check

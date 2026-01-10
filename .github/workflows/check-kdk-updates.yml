@@ -65,6 +65,10 @@ jobs:
           # Use modern GitHub Actions output format
           with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
               f.write("new_release=false\n")
+              f.write("version=\n")
+              f.write("download_url=\n")
+              f.write("macos_version=\n")
+              f.write("date=\n")
           EOF
       
       - name: Read KDK versions file
@@ -97,7 +101,6 @@ jobs:
             - [ ] Verify the release on Apple Developer Portal
             - [ ] Test the new KDK version
             - [ ] Update documentation if needed
-            - [ ] Create a GitHub release for tracking
             
             ---
             *This issue was automatically created by the KDK update checker workflow.*
@@ -110,6 +113,57 @@ jobs:
               body: issueBody,
               labels: ['kdk-update', 'automated']
             });
+      
+      - name: Create GitHub release
+        if: steps.check_kdk.outputs.new_release == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.check_kdk.outputs.version }}';
+            const downloadUrl = '${{ steps.check_kdk.outputs.download_url }}';
+            const macosVersion = '${{ steps.check_kdk.outputs.macos_version }}';
+            
+            const releaseTag = `kdk-${version}`;
+            const releaseName = `Kernel Debug Kit ${version}`;
+            const releaseBody = `## Kernel Debug Kit ${version}
+            
+            This release tracks the availability of a new Kernel Debug Kit from Apple.
+            
+            ### Release Information
+            
+            - **KDK Version:** ${version}
+            - **macOS Version:** ${macosVersion || version}
+            - **Detection Date:** ${{ steps.check_kdk.outputs.date || github.event.repository.updated_at }}
+            
+            ### Download
+            
+            Download this KDK from Apple Developer Portal:
+            ${downloadUrl || 'https://developer.apple.com/download/all/'}
+            
+            ### Installation
+            
+            Please refer to the [README](https://github.com/${context.repo.owner}/${context.repo.repo}#-quick-start) for installation and usage instructions.
+            
+            ---
+            
+            *This release was automatically created by the KDK update checker workflow.*
+            `;
+            
+            try {
+              await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: releaseTag,
+                name: releaseName,
+                body: releaseBody,
+                draft: false,
+                prerelease: false
+              });
+              console.log(`✅ Created release: ${releaseName}`);
+            } catch (error) {
+              console.error('Failed to create release:', error);
+              // Don't fail the workflow if release creation fails
+            }
       
       - name: Commit version updates
         if: steps.check_kdk.outputs.new_release == 'true'
