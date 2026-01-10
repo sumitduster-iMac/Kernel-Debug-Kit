@@ -122,6 +122,7 @@ jobs:
             const version = '${{ steps.check_kdk.outputs.version }}';
             const downloadUrl = '${{ steps.check_kdk.outputs.download_url }}';
             const macosVersion = '${{ steps.check_kdk.outputs.macos_version }}';
+            const detectionDate = '${{ steps.check_kdk.outputs.date }}' || new Date().toISOString().split('T')[0];
             
             const releaseTag = `kdk-${version}`;
             const releaseName = `Kernel Debug Kit ${version}`;
@@ -132,8 +133,8 @@ jobs:
             ### Release Information
             
             - **KDK Version:** ${version}
-            - **macOS Version:** ${macosVersion || version}
-            - **Detection Date:** ${{ steps.check_kdk.outputs.date || github.event.repository.updated_at }}
+            ${macosVersion ? `- **macOS Version:** ${macosVersion}` : ''}
+            - **Detection Date:** ${detectionDate}
             
             ### Download
             
