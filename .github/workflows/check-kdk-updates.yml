@@ -4,7 +4,6 @@ on:
   schedule:
     # Run daily at 00:00 UTC
     - cron: '0 0 * * *'
-  workflow_dispatch: # Allow manual trigger
 
 permissions:
   contents: write  # For committing version updates
@@ -64,8 +63,16 @@ jobs:
           # - Set new_release=true if new version found
           
           # Use modern GitHub Actions output format
+          # Generate current date as fallback
+          from datetime import datetime
+          current_date = datetime.utcnow().strftime('%Y-%m-%d')
+          
           with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
               f.write("new_release=false\n")
+              f.write("version=\n")
+              f.write("download_url=\n")
+              f.write("macos_version=\n")
+              f.write(f"date={current_date}\n")
           EOF
       
       - name: Read KDK versions file
@@ -98,7 +105,6 @@ jobs:
             - [ ] Verify the release on Apple Developer Portal
             - [ ] Test the new KDK version
             - [ ] Update documentation if needed
-            - [ ] Create a GitHub release for tracking
             
             ---
             *This issue was automatically created by the KDK update checker workflow.*
@@ -111,6 +117,60 @@ jobs:
               body: issueBody,
               labels: ['kdk-update', 'automated']
             });
+      
+      - name: Create GitHub release
+        if: steps.check_kdk.outputs.new_release == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ steps.check_kdk.outputs.version }}';
+            const downloadUrl = '${{ steps.check_kdk.outputs.download_url }}';
+            const macosVersion = '${{ steps.check_kdk.outputs.macos_version }}';
+            const detectionDate = '${{ steps.check_kdk.outputs.date }}';
+            
+            const releaseTag = `kdk-${version}`;
+            const releaseName = `Kernel Debug Kit ${version}`;
+            const releaseBody = `## Kernel Debug Kit ${version}
+            
+            This release tracks the availability of a new Kernel Debug Kit from Apple.
+            
+            ### Release Information
+            
+            - **KDK Version:** ${version}
+            - **macOS Version:** ${macosVersion || 'N/A'}
+            - **Detection Date:** ${detectionDate}
+            
+            ### Download
+            
+            Download this KDK from Apple Developer Portal:
+            ${downloadUrl || 'https://developer.apple.com/download/all/'}
+            
+            ### Installation
+            
+            Please refer to the [README](https://github.com/${context.repo.owner}/${context.repo.repo}#-quick-start) for installation and usage instructions.
+            
+            ---
+            
+            *This release was automatically created by the KDK update checker workflow.*
+            `;
+            
+            try {
+              await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: releaseTag,
+                name: releaseName,
+                body: releaseBody,
+                draft: false,
+                prerelease: false
+              });
+              console.log(`✅ Created release: ${releaseName}`);
+            } catch (error) {
+              console.error(`❌ Failed to create GitHub release for ${releaseName}`);
+              console.error(`Error details: ${error.message}`);
+              console.error('You may need to create the release manually from the GitHub UI.');
+              // Don't fail the workflow if release creation fails
+            }
       
       - name: Commit version updates
         if: steps.check_kdk.outputs.new_release == 'true'
